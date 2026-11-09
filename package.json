@@ -1,0 +1,13 @@
+{
+  "name": "zelixsec",
+  "productName": "ZelixSec",
+  "version": "1.0.2",
+  "description": "Tek tuşla DPI atlatan yerel ağ geçidi: TLS ClientHello parçalama + DNS-over-HTTPS",
+  "author": "ZelixSec",
+  "license": "MIT",
+  "private": true,
+  "main": "electron/main.js",
+  "engines": {
+    "node": ">=18"
+  }
+}

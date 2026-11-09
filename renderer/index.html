@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; connect-src 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZelixSec</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+              <linearGradient id="zg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#34e5ff" />
+                <stop offset="100%" stop-color="#7c5cff" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M24 3 42 10v13c0 11-7.6 19.6-18 22C13.6 42.6 6 34 6 23V10L24 3Z"
+              fill="url(#zg)"
+              opacity="0.16"
+              stroke="url(#zg)"
+              stroke-width="1.6"
+            />
+            <path d="M16 24.5l5.4 5.4L32.5 18" fill="none" stroke="url(#zg)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="brand-text">
+            <h1>Zelix<span>Sec</span></h1>
+            <p id="brandSub" data-i18n="brand.sub">DPI atlatma ağ geçidi</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <span class="badge" id="platformBadge">—</span>
+          <button class="update-badge hidden" id="updateBadge" data-i18n="badge.update" aria-label="Güncelleme var">Güncelleme var!</button>
+          <button class="icon-btn" id="hideBtn" title="Tepsiye küçült" data-i18n-title="general.tray" aria-label="Tepsiye küçült">▾</button>
+          <button class="icon-btn" id="settingsBtn" title="Ayarlar" data-i18n-title="drawer.title" aria-label="Ayarlar">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm8.1 4.9.1-1.5-.1-1.5 1.9-1.4-1.8-3.1-2.2.8-1.3-.8L16 3.4l-3.6-.1-.7 2.3-1.4.8-2.2-.8-1.9 3.1 1.9 1.4-.1 1.5.1 1.5-1.9 1.4 1.9 3.1 2.2-.8 1.3.8.8 2.3H16l.7-2.3 1.3-.8 2.2.8 1.8-3.1-1.9-1.4Z"
+                fill="currentColor"
+                opacity="0.85"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="card hero" id="heroCard">
+          <div class="profiles" id="profileRow" role="tablist" aria-label="Hedef profilleri"></div>
+
+          <button class="power" id="powerBtn" aria-label="Bağlan / Kes">
+            <span class="power-ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
+              <path d="M12 3v9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+              <path
+                d="M7.4 6.2a7.4 7.4 0 1 0 9.2 0"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                fill="none"
+              />
+            </svg>
+          </button>
+
+          <div class="status-line">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusLabel" data-i18n="status.off">Bağlı değil</span>
+          </div>
+          <p class="status-sub" id="statusSub" data-i18n="status.subOff">Tek tuşa bas: ilk paket bölünür, DPI imzası bozulur.</p>
+
+          <div class="hero-meta">
+            <span class="pill" id="modePill">split2</span>
+            <span class="pill" id="portPill">127.0.0.1:7717</span>
+            <span class="pill" id="dohPill">DoH: Cloudflare</span>
+          </div>
+
+          <div class="hero-actions">
+            <label class="switch">
+              <input type="checkbox" id="systemProxyToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="hero.systemProxy">Sistem vekili (tek tuş)</span>
+            </label>
+            <button class="btn ghost" id="diagBtn" data-i18n="hero.diag">Teşhis çalıştır</button>
+            <button class="btn ghost" id="flushBtn" data-i18n="hero.flush">DNS temizle</button>
+          </div>
+        </section>
+
+        <aside class="side">
+          <section class="card stats">
+            <div class="stat">
+              <span class="stat-label" data-i18n="stat.latency">Gecikme</span>
+              <span class="stat-value" id="statLatency">—</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label" data-i18n="stat.active">Aktif bağlantı</span>
+              <span class="stat-value" id="statActive">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label" data-i18n="stat.down">İndirilen</span>
+              <span class="stat-value" id="statDown">0 B</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label" data-i18n="stat.up">Yüklenen</span>
+              <span class="stat-value" id="statUp">0 B</span>
+            </div>
+            <div class="stat wide">
+              <span class="stat-label" data-i18n="stat.resets">DPI sıfırlama şüphesi</span>
+              <span class="stat-value" id="statResets">0</span>
+            </div>
+            <div class="stat wide">
+              <span class="stat-label" data-i18n="stat.ads">Engellenen reklam</span>
+              <span class="stat-value" id="statAds">0</span>
+            </div>
+          </section>
+
+          <section class="card last-split">
+            <h2 data-i18n="last.title">Son bölme</h2>
+            <p class="mono" id="lastSplit" data-i18n="last.none">Henüz paket bölünmedi</p>
+          </section>
+        </aside>
+
+        <section class="card diag hidden" id="diagCard">
+          <div class="card-head">
+            <h2 data-i18n="diag.card">Teşhis raporu</h2>
+            <button class="btn tiny ghost" id="diagClose" data-i18n="diag.close">Kapat</button>
+          </div>
+          <div class="diag-body" id="diagBody"></div>
+        </section>
+
+        <section class="card hosts">
+          <div class="card-head">
+            <h2 data-i18n="hosts.title">Son hedefler</h2>
+            <span class="hint" id="hostCount">0 hedef</span>
+          </div>
+          <ul class="host-list" id="hostList">
+            <li class="empty" data-i18n="hosts.empty">Trafik bekleniyor…</li>
+          </ul>
+        </section>
+
+        <section class="card logs">
+          <div class="card-head">
+            <h2 data-i18n="logs.title">Günlük</h2>
+            <div class="log-tools">
+              <button class="btn tiny ghost" id="exportLogBtn" data-i18n="logs.export">Dışa aktar</button>
+              <button class="btn tiny ghost" id="clearLogBtn" data-i18n="logs.clear">Temizle</button>
+            </div>
+          </div>
+          <div class="log-console" id="logConsole" role="log" aria-live="polite"></div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span class="footer-brand">ZelixSec <b id="versionLabel">1.0.2</b><span class="footer-dot"> · </span><span data-i18n="brand.sub">DPI atlatma ağ geçidi</span></span>
+        <span class="footer-author">ZelixYzlm — Emir Özer</span>
+      </footer>
+    </div>
+
+    <!-- Ayarlar çekmecesi -->
+    <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+    <aside class="drawer hidden" id="drawer" aria-label="Ayarlar">
+      <div class="drawer-head">
+        <h2 data-i18n="drawer.title">Ayarlar</h2>
+        <button class="icon-btn" id="drawerClose" aria-label="Kapat">✕</button>
+      </div>
+
+      <div class="drawer-layout">
+        <nav class="drawer-nav" aria-label="Ayarlar sekmeleri">
+          <button class="drawer-tab active" data-tab="general" type="button"><span class="tab-ico">⚙</span><span data-i18n="tab.general">Genel</span></button>
+          <button class="drawer-tab" data-tab="engine" type="button"><span class="tab-ico">🛡</span><span data-i18n="tab.engine">Motor</span></button>
+          <button class="drawer-tab" data-tab="dns" type="button"><span class="tab-ico">🌐</span><span data-i18n="tab.dns">DNS</span></button>
+          <button class="drawer-tab" data-tab="adblock" type="button"><span class="tab-ico">🚫</span><span data-i18n="tab.adblock">Reklam</span></button>
+          <button class="drawer-tab" data-tab="view" type="button"><span class="tab-ico">🎨</span><span data-i18n="tab.view">Görünüm</span></button>
+          <button class="drawer-tab" data-tab="update" type="button"><span class="tab-ico">⬆</span><span data-i18n="tab.update">Güncelleme</span><i class="tab-dot hidden" data-tab-dot="update" aria-hidden="true"></i></button>
+          <button class="drawer-tab" data-tab="test" type="button"><span class="tab-ico">🧪</span><span data-i18n="tab.test">Test</span></button>
+          <button class="drawer-tab" data-tab="how" type="button"><span class="tab-ico">❓</span><span data-i18n="tab.how">Nasıl Çalışır</span></button>
+          <button class="drawer-tab" data-tab="about" type="button"><span class="tab-ico">ℹ</span><span data-i18n="tab.about">Hakkında</span></button>
+        </nav>
+
+        <div class="drawer-body">
+          <!-- GENEL -->
+          <div class="drawer-panel active" data-panel="general">
+            <label class="field">
+              <span data-i18n="general.language">Uygulama dili</span>
+              <select id="languageSelect"></select>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="autoStartToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="general.autoStart">Sistem açılışında başlat</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="trayToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="general.tray">Kapatınca tepsiye küçült</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="autoConnectToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="general.autoConnect">Açılışta otomatik bağlan</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="autoProxyToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="general.autoProxy">Bağlanınca sistem vekilini aç</span>
+            </label>
+          </div>
+
+          <!-- MOTOR -->
+          <div class="drawer-panel" data-panel="engine">
+            <h3 data-i18n="engine.splitting">Parçalama</h3>
+            <label class="field">
+              <span data-i18n="engine.mode">Mod</span>
+              <select id="modeSelect">
+                <option value="split2" data-i18n="mode.split2">split2 — SNI ilk baytı ayrılır (önerilen)</option>
+                <option value="split-sni" data-i18n="mode.split-sni">split-sni — hostname tamamen 1. segmentte</option>
+                <option value="split-record" data-i18n="mode.split-record">split-record — TLS kayıt başlığından sonra</option>
+                <option value="split-middle" data-i18n="mode.split-middle">split-middle — paketi ortadan böl</option>
+                <option value="split-pos" data-i18n="mode.split-pos">split-pos — sabit ofset</option>
+                <option value="off" data-i18n="mode.off">off — bölme yok (sadece DNS/vekil)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span data-i18n="engine.splitPos">Sabit ofset (split-pos)</span>
+              <input type="number" id="splitPosInput" min="1" max="1500" step="1" value="1" />
+            </label>
+            <label class="field">
+              <span data-i18n="engine.delay">Segmentler arası gecikme (ms)</span>
+              <input type="number" id="splitDelayInput" min="0" max="2000" step="1" value="0" />
+            </label>
+            <label class="field">
+              <span data-i18n="engine.port">Yerel port</span>
+              <input type="number" id="portInput" min="1024" max="65535" step="1" value="7717" />
+            </label>
+
+            <h3 data-i18n="engine.upstream">Yukarı akış (IP blokları için)</h3>
+            <p class="field-note" data-i18n="engine.upstreamNote">SNI bloklarını ZelixSec tek başına aşar.</p>
+            <label class="switch">
+              <input type="checkbox" id="upstreamToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label">Yukarı akış kullan</span>
+            </label>
+            <div class="row">
+              <label class="field">
+                <span data-i18n="engine.type">Tür</span>
+                <select id="upstreamType">
+                  <option value="socks5">SOCKS5</option>
+                  <option value="http">HTTP</option>
+                </select>
+              </label>
+              <label class="field">
+                <span data-i18n="engine.server">Sunucu</span>
+                <input type="text" id="upstreamHost" placeholder="127.0.0.1" />
+              </label>
+              <label class="field">
+                <span data-i18n="engine.port">Yerel port</span>
+                <input type="number" id="upstreamPort" min="1" max="65535" />
+              </label>
+            </div>
+            <div class="row">
+              <label class="field">
+                <span data-i18n="engine.user">Kullanıcı (opsiyonel)</span>
+                <input type="text" id="upstreamUser" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span data-i18n="engine.pass">Şifre (opsiyonel)</span>
+                <input type="password" id="upstreamPass" autocomplete="off" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span data-i18n="engine.hosts">Özel alan adları (virgülle)</span>
+              <textarea id="customHostsInput" rows="3" placeholder="ornek.com, oyun.example.net"></textarea>
+            </label>
+            <p class="field-note" data-i18n="engine.hostsNote">Her kayıt bir alan adıdır; alt alan adları otomatik dahildir.</p>
+          </div>
+
+          <!-- DNS -->
+          <div class="drawer-panel" data-panel="dns">
+            <h3>DNS (DoH)</h3>
+            <label class="switch">
+              <input type="checkbox" id="dohToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="dns.enable">DoH ile DNS sorgula</span>
+            </label>
+            <label class="field">
+              <span data-i18n="dns.provider">Sağlayıcı</span>
+              <select id="dohProvider">
+                <option value="cloudflare" data-i18n="dns.p.cloudflare">Cloudflare (1.1.1.1)</option>
+                <option value="google" data-i18n="dns.p.google">Google (8.8.8.8)</option>
+                <option value="quad9" data-i18n="dns.p.quad9">Quad9 (9.9.9.9)</option>
+                <option value="system" data-i18n="dns.p.system">Sistem DNS</option>
+              </select>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="dohFallbackToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="dns.fallback">DoH başarısızsa sistem DNS'ine düş</span>
+            </label>
+          </div>
+
+          <!-- REKLAM -->
+          <div class="drawer-panel" data-panel="adblock">
+            <label class="switch">
+              <input type="checkbox" id="adblockToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="adblock.enable">Reklam ve izleyici engelleyici</span>
+            </label>
+
+            <div class="adblock-stat">
+              <span class="stat-value big" id="adblockCount">0</span>
+              <span class="stat-label" data-i18n="adblock.blocked">Engellenen reklam bağlantısı</span>
+            </div>
+
+            <p class="field-note" data-i18n="adblock.blockedHosts">Son engellenen alan adları</p>
+            <ul class="block-list" id="adblockHosts">
+              <li class="empty" data-i18n="adblock.empty">Engellenen bağlantı yok</li>
+            </ul>
+
+            <label class="field">
+              <span data-i18n="adblock.list">Özel engel listesi (virgülle)</span>
+              <textarea id="adblockListInput" rows="2" placeholder="reklam.ornek.com, adserv.example.net"></textarea>
+            </label>
+            <p class="field-note" data-i18n="adblock.listNote">Sonek eşlemesi kullanılır.</p>
+            <p class="field-note" data-i18n="adblock.workingNote">Reklam engelleme, sistem vekili açıkken geçen trafikte uygulanır.</p>
+
+            <div class="row btn-row">
+              <button class="btn ghost" id="adblockClearBtn" type="button" data-i18n="adblock.clear">Sayacı sıfırla</button>
+              <button class="btn ghost" id="adblockTestBtn" type="button" data-i18n="adblock.test">Engelleyiciyi test et</button>
+            </div>
+          </div>
+
+          <!-- GÖRÜNÜM -->
+          <div class="drawer-panel" data-panel="view">
+            <h3 data-i18n="view.color">Renk teması (12 seçenek)</h3>
+            <div class="swatch-grid" id="themeGrid"></div>
+
+            <label class="field">
+              <span><span data-i18n="view.opacity">Panel saydamlığı</span> — <b id="opacityValue">78</b>%</span>
+              <input type="range" id="opacityRange" min="25" max="100" step="1" value="78" />
+            </label>
+
+            <label class="switch">
+              <input type="checkbox" id="auroraToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="view.aurora">Arka plan ışık halesi</span>
+            </label>
+          </div>
+
+          <!-- GÜNCELLEME -->
+          <div class="drawer-panel" data-panel="update">
+            <label class="switch">
+              <input type="checkbox" id="updateAutoToggle" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label" data-i18n="update.auto">Açılışta güncellemeleri kontrol et</span>
+            </label>
+
+            <label class="field">
+              <span data-i18n="update.manifest">Manifest adresi (update.json)</span>
+              <input type="text" id="updateManifestInput" autocomplete="off" spellcheck="false" />
+            </label>
+            <p class="field-note" data-i18n="update.manifestNote">Kendi sunucunuzda veya GitHub raw üzerinde barındırabilirsiniz.</p>
+
+            <div class="row btn-row">
+              <button class="btn ghost" id="updateCheckBtn" type="button" data-i18n="update.check">Şimdi kontrol et</button>
+              <button class="btn primary hidden" id="updateInstallBtn" type="button" data-i18n="update.install">Güncelleme indir ve kur</button>
+            </div>
+
+            <p class="field-note" id="updateStatusText"></p>
+            <div class="progress hidden" id="updateProgressWrap">
+              <div class="progress-fill" id="updateProgressFill"></div>
+            </div>
+
+            <div class="update-notes hidden" id="updateNotesWrap">
+              <h3 data-i18n="update.notes">Yenilikler</h3>
+              <div class="update-notes-body" id="updateNotes"></div>
+            </div>
+
+            <p class="hint" id="updateLastCheck"></p>
+            <p class="field-note" data-i18n="update.installNote">Kurulum dosyası arka planda indirilir ve sessizce kurulur.</p>
+          </div>
+
+          <!-- TEST -->
+          <div class="drawer-panel" data-panel="test">
+            <h3 data-i18n="test.title">Bağlantı testi</h3>
+            <label class="field">
+              <span data-i18n="test.target">Test hedefi (alan adı)</span>
+              <input type="text" id="testTargetInput" placeholder="discord.com" autocomplete="off" spellcheck="false" />
+            </label>
+            <p class="field-note" data-i18n="test.note">Test; DoH çözümü, doğrudan TLS ve ZelixSec TLS karşılaştırmasını ölçer.</p>
+            <div class="row btn-row">
+              <button class="btn primary" id="testRunBtn" type="button" data-i18n="test.run">Testi çalıştır</button>
+              <button class="btn ghost" id="testFlushBtn" type="button" data-i18n="test.flush">DNS önbelleğini temizle</button>
+            </div>
+          </div>
+
+          <!-- NASIL ÇALIŞIR -->
+          <div class="drawer-panel" data-panel="how">
+            <h3 data-i18n="how.title">Nasıl çalışır?</h3>
+            <p class="how-p" data-i18n="how.p1">DPI, SNI bilgisini tek segmentte arar.</p>
+            <p class="how-p" data-i18n="how.p2">Alan adları DoH ile çözülür.</p>
+            <p class="how-p" data-i18n="how.p3">Reklam engelleyici yerelde çalışır.</p>
+            <ul class="how-list">
+              <li data-i18n="how.b1">Parçalama: ilk TLS paketi ikiye bölünür.</li>
+              <li data-i18n="how.b2">DoH: DNS sorguları şifreli gider.</li>
+              <li data-i18n="how.b3">Vekil: 127.0.0.1 üzerindeki motora yönlendirilir.</li>
+              <li data-i18n="how.b4">Reklam engelleme: bilinen ağlar reddedilir.</li>
+            </ul>
+          </div>
+
+          <!-- HAKKINDA -->
+          <div class="drawer-panel" data-panel="about">
+            <h2 class="about-name">Zelix<span>Sec</span></h2>
+            <p class="about-tagline" data-i18n="brand.sub">DPI atlatma ağ geçidi</p>
+
+            <div class="about-row">
+              <span data-i18n="about.version">Sürüm</span>
+              <b id="aboutVersion">1.0.2</b>
+            </div>
+            <div class="about-row">
+              <span data-i18n="about.author">Geliştirici</span>
+              <b>ZelixYzlm — Emir Özer</b>
+            </div>
+
+            <p class="how-p" data-i18n="about.desc">ZelixSec yerel bir ağ geçididir.</p>
+            <p class="field-note" data-i18n="about.legal">Yasalar ve hizmet koşulları kullanıcının sorumluluğundadır.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-foot">
+        <button class="btn ghost" id="resetBtn" data-i18n="drawer.reset">Sıfırla</button>
+        <button class="btn primary" id="saveBtn" data-i18n="drawer.save">Kaydet ve uygula</button>
+      </div>
+    </aside>
+
+    <div class="toast hidden" id="toast" role="status"></div>
+
+    <script src="i18n.js"></script>
+    <script src="i18n-eu-a.js"></script>
+    <script src="i18n-eu-b.js"></script>
+    <script src="i18n-eu-c.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
